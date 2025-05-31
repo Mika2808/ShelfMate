@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shelf_mate/main.dart';
+import 'to_read.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -103,7 +104,12 @@ class _HomePageState extends State<HomePage> {
             ListTile(
               leading: const Icon(Icons.list),
               title: const Text('To-Read List'),
-              onTap: () => _navigate('/to-read'),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ToReadPage()),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.casino),
