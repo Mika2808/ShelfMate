@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'book_entry.dart';
 import 'config.dart';
 import 'home.dart';
+import 'review.dart';
 
 class BooksPage extends StatefulWidget {
   const BooksPage({super.key});
@@ -150,7 +151,12 @@ class _BooksPageState extends State<BooksPage> {
                                     const SizedBox(height: 20),
                                     ElevatedButton(
                                       onPressed: () {
-                                        Navigator.pushNamed(context, '/books/${book.id}');
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => BookDetailsPage(bookId: book.id),
+                                          ),
+                                        );
                                       },
                                       child: const Text('See more'),
                                     ),
