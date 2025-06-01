@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shelf_mate/main.dart';
 import 'to_read.dart';
 import 'roullete.dart';
+import 'books.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -100,7 +101,12 @@ class _HomePageState extends State<HomePage> {
             ListTile(
               leading: const Icon(Icons.search),
               title: const Text('Search Book'),
-              onTap: () => _navigate('/books'),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const BooksPage()),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.list),

@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'book_entry.dart';
 import 'config.dart';
+import 'home.dart';
 
 class BooksPage extends StatefulWidget {
   const BooksPage({super.key});
@@ -14,16 +15,22 @@ class BooksPage extends StatefulWidget {
 
 class _BooksPageState extends State<BooksPage> {
   List<BookEntry> _allBooks = [];
-  int _page = 1;
   final int _booksPerPage = 5;
   String? _token;
   bool _isLoading = true;
-  Map<int, String> _addStatusMap = {};
+  late PageController _pageController;
 
   @override
   void initState() {
     super.initState();
+    _pageController = PageController();
     _loadToken().then((_) => _fetchBooks());
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadToken() async {
@@ -56,100 +63,108 @@ class _BooksPageState extends State<BooksPage> {
     }
   }
 
-  List<BookEntry> get _paginatedBooks {
-    final start = (_page - 1) * _booksPerPage;
-    final end = (_page * _booksPerPage).clamp(0, _allBooks.length);
-    return _allBooks.sublist(start, end);
-  }
-
-  Future<void> _addToToRead(int bookId) async {
-    setState(() {
-      _addStatusMap[bookId] = 'adding';
-    });
-
-    try {
-      await http.post(
-        Uri.parse('${AppConfig.baseUrl}/to-read/books/$bookId'),
-        headers: {'Authorization': 'Bearer $_token'},
-      );
-      setState(() {
-        _addStatusMap[bookId] = 'added';
-      });
-      Future.delayed(const Duration(seconds: 3), () {
-        setState(() => _addStatusMap.remove(bookId));
-      });
-    } catch (_) {
-      setState(() {
-        _addStatusMap[bookId] = 'error';
-      });
-      Future.delayed(const Duration(seconds: 3), () {
-        setState(() => _addStatusMap.remove(bookId));
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final totalPages = (_allBooks.length / _booksPerPage).ceil();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Books Page')),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: _paginatedBooks.length,
+        appBar: AppBar(
+          title: const Text('Books Search'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const HomePage()),
+              );
+            },
+          ),
+        ),
+        body: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : PageView.builder(
+                controller: _pageController,
+                itemCount: totalPages,
+                itemBuilder: (context, pageIndex) {
+                  final start = pageIndex * _booksPerPage;
+                  final end = (start + _booksPerPage).clamp(0, _allBooks.length);
+                  final booksOnPage = _allBooks.sublist(start, end);
+
+                  return ListView.builder(
+                    itemCount: booksOnPage.length,
                     itemBuilder: (context, index) {
-                      final book = _paginatedBooks[index];
+                      final book = booksOnPage[index];
                       return Card(
-                        margin: const EdgeInsets.all(8),
-                        child: ListTile(
-                          leading: book.cover != null
-                              ? Image.network(book.cover!, width: 50, fit: BoxFit.cover)
-                              : const Icon(Icons.image_not_supported),
-                          title: Text(book.title),
-                          subtitle: Text('by ${book.author}'),
-                          trailing: _addStatusMap[book.id] == 'adding'
-                              ? const CircularProgressIndicator()
-                              : ElevatedButton(
-                                  onPressed: () => _addToToRead(book.id),
-                                  child: Text(_addStatusMap[book.id] == 'added'
-                                      ? '✓ Added'
-                                      : _addStatusMap[book.id] == 'error'
-                                          ? 'Error'
-                                          : 'Add'),
+                        elevation: 4,
+                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: 110,
+                                height: 160,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.grey[300],
                                 ),
-                          onTap: () {
-                            Navigator.pushNamed(context, '/books/${book.id}');
-                          },
+                                child: book.cover != null
+                                    ? ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.network(
+                                          book.cover!,
+                                          width: 110,
+                                          height: 160,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      )
+                                    : const Center(
+                                        child: Icon(
+                                          Icons.image_not_supported,
+                                          size: 40,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                              ),
+                              const SizedBox(width: 20),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      book.title,
+                                      style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Text(
+                                      'by ${book.author}',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 20),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.pushNamed(context, '/books/${book.id}');
+                                      },
+                                      child: const Text('See more'),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back),
-                        onPressed: _page > 1 ? () => setState(() => _page--) : null,
-                      ),
-                      Text('Page $_page of $totalPages'),
-                      IconButton(
-                        icon: const Icon(Icons.arrow_forward),
-                        onPressed: _page < totalPages
-                            ? () => setState(() => _page++)
-                            : null,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-    );
+                  );
+                },
+              ),
+      );
   }
 }
