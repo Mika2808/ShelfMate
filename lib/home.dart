@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shelf_mate/main.dart';
 import 'to_read.dart';
+import 'roullete.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -85,7 +86,7 @@ class _HomePageState extends State<HomePage> {
             DrawerHeader(
               decoration: BoxDecoration(color: primaryColor),
               child: Text(
-                'ShelfMate Menu',
+                'Menu',
                 style: const TextStyle(color: Colors.white, fontSize: 24),
               ),
             ),
@@ -114,7 +115,12 @@ class _HomePageState extends State<HomePage> {
             ListTile(
               leading: const Icon(Icons.casino),
               title: const Text('Book Roulette'),
-              onTap: () => _navigate('/random-book'),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const RoulettePage()),
+                );
+              },
             ),
           ],
         ),
