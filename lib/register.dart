@@ -57,11 +57,12 @@ class _RegisterPageState extends State<RegisterPage> {
         final prefs = await  SharedPreferences.getInstance();
         await prefs.setString('token', data['token']);
         await prefs.setString('nick', data['nick']);
-        await prefs.setString('id', data['id']);
+        await prefs.setInt('id', data['id']);
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Welcome ${data['nick']}!')),
+          SnackBar(content: Text('Logged in as $email')),
         );
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const HomePage()),
