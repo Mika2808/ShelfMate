@@ -5,6 +5,7 @@ import 'package:shelf_mate/main.dart';
 import 'to_read.dart';
 import 'roullete.dart';
 import 'books.dart';
+import 'nearby_bookstores.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -125,6 +126,16 @@ class _HomePageState extends State<HomePage> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => const RoulettePage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.location_on),
+              title: Text('Nearby Bookstores'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => NearbyBookstoresPage()),
                 );
               },
             ),
