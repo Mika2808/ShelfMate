@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:shelf_mate/home.dart';
 import 'login.dart';
 import 'register.dart';
+import 'theme.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,16 +16,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'ShelfMate',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
-        useMaterial3: true,
-        fontFamily: 'Roboto',
-        textTheme: const TextTheme(
-          headlineMedium: TextStyle(fontWeight: FontWeight.bold),
-        ),
-      ),
-      home: const MyHomePage(),
-    );
+      theme: AppTheme.themeData,
+      home: const HomePage(),
+      );
   }
 }
 
